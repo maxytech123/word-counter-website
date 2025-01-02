@@ -28,9 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text.length > 0) {
             originalText = text;
             const language = languageSelect.value;
-            const translated = await translateText(text, language);
-            console.log('Translated Text:', translated);
-            translatedText.textContent = translated;
+            try {
+                const translated = await translateText(text, language);
+                console.log('Translated Text:', translated);
+                translatedText.textContent = translated;
+            } catch (error) {
+                console.error('Translation failed:', error);
+                translatedText.textContent = 'Translation failed';
+            }
         }
     });
 
@@ -50,8 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }),
             headers: { 'Content-Type': 'application/json' }
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         console.log('API Response:', data);
+        if (data.error) {
+            throw new Error(data.error);
+        }
         return data.translatedText;
     }
 });
